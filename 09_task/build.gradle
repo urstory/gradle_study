@@ -1,0 +1,164 @@
+task hello1 << {
+        print name + ' : Hello Gradle world!'
+}
+
+// task hello2 {
+//         print name + ' : Hello Gradle world!'
+// }
+
+task showDescription << {
+    println description
+}
+showDescription.description = 'showDescription !!'
+
+task showDescription2
+showDescription2.description = 'showDescription2 !!'
+showDescription2 << {
+    println description
+}
+
+task showDescription3 {
+        description = 'showDescription3'
+        doLast {
+            println description
+        }
+}
+
+task myCopyExtension(type : Copy){
+    from 'original'
+    into 'target'
+
+    File newFile = file('original/newFile.txt')
+    doFirst {
+        println 'write to file'
+        newFile.write('copy file', 'UTF-8')
+    }
+    doLast {
+        File copied = file('original/newFile_copied.txt')
+        if(newFile.renameTo(copied)){
+            println 'copy complete'
+        }else {
+            println 'copy failed'
+        }
+    }
+}
+
+task firstLastTest(type : Copy) {
+    doFirst {
+        println 'doFirst'
+    }
+    doLast {
+        println 'doLast'
+    }
+}
+
+def instances = ['AppServer': '192.168.100.100', 'DBServer': '192.168.100.110', 'ApiServer': '192.168.100.101']
+
+instances.each { serverType, ipAddress -> 
+        task "show${serverType}" << {
+            println ipAddress
+        }
+}
+
+task todo << {
+    println 'todo'
+}
+
+task doing << {
+    println 'doing'
+}
+
+task done << {
+    println 'done'
+}
+
+doing.dependsOn todo
+done.dependsOn doing
+
+
+task reviewing << {
+    println 'reviewing'
+}
+
+// task done2(dependsOn: [doing, reviewing]) <<{
+//     println 'done2!'
+// }
+
+task done2 << {
+    println 'done2!'
+}
+
+
+// 클로저를 이용하는 방법
+done2.dependsOn {
+    [doing, reviewing]
+}
+
+// 배열을 이용하는 방법
+done2.dependsOn doing, reviewing
+
+
+tasks.addRule ('Pattern: show<TASKS_NAME>: Show task name.'){
+    taskName ->
+        if(taskName.startsWith('show')){
+            task(taskName) << {
+                println '*** ' + taskName + ' ***'
+            }
+        }
+}
+
+
+task specialTask << {
+    println 'specialTask!!'
+}
+
+specialTask.onlyIf {
+    buildType == 'partial-build'
+}
+
+
+task skippedIfExceptionOccurred << {
+    println 'start'
+}
+
+skippedIfExceptionOccurred << {
+    if(process == 'error'){
+        throw new StopExecutionException()
+    }
+}
+
+skippedIfExceptionOccurred << {
+    println 'end'
+}
+
+
+task before1 << {
+    println 'before1'
+}
+
+task after1 << {
+    println 'after1'
+}
+
+after1.mustRunAfter before1
+
+task before2 << {
+    println 'before2'
+}
+
+task after2 << {
+    println 'after2'
+}
+
+after2.shouldRunAfter before2
+
+
+task normalTask << {
+    println name
+}
+
+task finalizerTask << {
+    println name
+}
+
+normalTask.finalizedBy finalizerTask

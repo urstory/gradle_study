@@ -1,0 +1,85 @@
+
+
+plugins {
+    id 'java'
+    // Application 플러그인을 지정한다.
+    id 'application'
+}
+
+// 메인 클래스의 FQCN명(완전한 클래스명)을 지정한다.
+mainClassName = 'App'
+
+sourceSets{
+    main {
+        java {
+            srcDir "${project.projectDir}/src/main_src/java"
+        }
+        resources {
+            srcDir "${project.projectDir}/src/main_src/resources"
+        }
+    }
+    integrationTest
+}
+
+
+def defaultEncoding = 'UTF-8'
+// 인코딩 지정에 compileTestJava 태스크 추가
+// 테스크가 늘어나면, 또 추가해야한다.
+// [compileJava, compileTestJava]*.options*.encoding = defaultEncoding
+tasks.withType(JavaCompile){
+    options.encoding = 'UTF-8'
+}
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+
+
+dependencies {
+    compile 'com.google.guava:guava:23.0'
+    testCompile 'junit:junit:4.12'
+}
+
+repositories {
+    jcenter()
+}
+
+compileJava {
+    // fork한 프로세스로 컴파일한다.
+    options.fork = true
+
+    // lint를 무효화한다.
+    options.compilerArgs << '-Xlint:unchecked'
+
+    // 부트스트랩/ 클래스 패스를 설정한다.
+    options.bootClasspath = 'C:\\devel\\Java\\jdk1.8.0_172\\jre\\lib\\rt.jar'
+}
+
+jar {
+    baseName = 'javaapp'
+    appendix = 'bin'
+    version = '0.1'
+    classifier = 'jdk8'
+    // jar파일명을 직접 지정할 경우
+    // archiveName = 'example.jar'
+    manifest {
+        attributes(
+            'Implementation-Title' : 'Java App',
+            'Implementation-Verstion' : version
+        )
+    }
+}
+
+javadoc {
+    // buildDir/dist/javadoc 폴더를 사용한다. 예전 책과 같이 문자열을 destinationDir에 설정하면 형변환 오류가 발생한다. 
+    destinationDir = new File(buildDir, 'dist/javadoc');
+    title = 'example Java App V0.1'
+    // @link 태그를 이용해서 자바 표준 API인 javadoc에 링크하는 것처럼 외부에 있는 Javadoc의 링크를 생성하고 싶을 경우 다음과 같이 설정한다.
+    // 이것으로 javadoc 명령의 -link 옵션에 전달할 파라미터를 설정할 수 있다.
+    options.links << 'http://docs.oracle.com/javase/8/api/'
+}
+
+task display {
+    doLast {
+        println "hello"
+    }
+}

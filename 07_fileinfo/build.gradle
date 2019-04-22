@@ -1,0 +1,167 @@
+
+task fileinfo << {
+    // File readFile = file('build.gradle')
+    File readFile = new File('build.gradle')
+    println readFile.path
+}
+
+task urlinfo << {
+    File index = null
+    URL url = new URL('file:build.gradle')
+    index = new File(url.path)
+    println index.absolutePath
+}
+
+import java.util.concurrent.Callable
+
+task urlinfo2 << {
+    File index = file(new Callable<String>() {
+        String call() {
+            '/index.html'
+        }
+    })
+    println index.path
+
+    index = file { '/index.html' }
+    println index.path
+}
+
+task existfile << {
+    // index2.html파일이 없을 경우 ok!는 출력되지 않고 빌드가 도중에 중단된다.
+    File existFile = file('/index2.html', PathValidation.FILE)
+    println 'ok!'
+}
+
+task files1 << {
+    FileCollection collections1 = files('index.html', 'home.html')
+    FileCollection collections2 = files('index.html', new File('home.html'), new URL('file:/index.html'))
+
+    List fileList = [new File('index.html'), new File('home.html')]
+    // 리스트 지정
+    FileCollection collections3 = files(fileList)
+    // 배열 지정
+    FileCollection collections4 = files(fileList as File[])
+    println collections1.files.size()
+    println collections2.files.size()
+    println collections3.files.size()
+    println collections4.files.size()
+    println collections2.files.take(2).path
+}
+
+task files2 << {
+    FileCollection collections = files('index.html', new File('home.html'), new URL('file:/index.html'))
+
+    //as 연산자를 이용한 변환
+    List list = collections as List
+    Set set1 = collections as Set 
+    File[] array = collections as File[] 
+    Set set2 = collections.files 
+    
+    // 파일 컬렉션에 파일이 하나이면 getSingleFile()을 사용할 수 있다.
+    FileCollection collection = files('index.html')
+    File file = collection.singleFile
+
+    println list.size()
+    println set1.size()
+    println array.length
+    println set2.size()
+}
+
+task files3 << {
+    FileCollection collections1 = files('index.html', new File('home.html'), new File('hello.html') )
+    println collections1.files.size()
+
+    FileCollection collections2 = collections1 + files('file2.txt');
+    FileCollection collections3 = collections1 - files('index.html');
+
+    println collections1.files.size()
+    println collections2.files.size()
+    println collections3.files.size()
+}
+
+task files4 << {
+    FileCollection collections1 = files('index.html', new File('home.html'), new File('hello.txt') )
+    FileCollection textFiles = collections1.filter {
+        file ->
+            file.name.endsWith ".txt"
+    }
+
+    println collections1.files.size()
+    println textFiles.files.size()
+}
+
+task fileTree1 << {
+    FileTree sourceTree = fileTree('/')
+    sourceTree.each { println it.name }
+
+    println '-- include *.html --'
+    FileTree javaFiles = sourceTree.include('**/*.html')
+    javaFiles.each { println it.name }
+
+    println '-- exclude index.html --'
+    FileTree tree = javaFiles.exclude('**/index.html')
+    tree.each { println it.name }
+
+}
+
+task fileTree2 << {
+    FileTree tree = fileTree('/'){
+            include '**/*.html'
+            exclude '**/index.html'
+    }
+    tree.each { println it.name }
+}
+
+task fileTree3 << {
+    FileTree tree = fileTree(dir : '/', include :'**/*.html', exclude :'**/index.html' )
+    tree.each { println it.name }
+}
+
+task fileTree4 << {
+    FileTree tree = fileTree('/')
+    FileTree htmlFiles = tree.matching { include '**/*.html' }
+    htmlFiles.each { println it.name }
+    println '--------------------------------------------'
+    FileTree nonHtmlFiles = tree.matching { exclude '**/*.html' }
+    nonHtmlFiles.each { println it.name }
+}
+
+task fileTree5 << {
+    FileTree tree = fileTree('/')
+    tree.visit {
+        fileDetails ->
+            println 'name : ' + fileDetails.getName()
+            if(fileDetails.isDirectory()){
+                println 'path : ' + fileDetails.getPath()
+            }else {
+                println 'file size : ' + fileDetails.getSize()
+            }
+    }
+}
+
+task genFile << {
+    String targetName = 'SimpleBean'
+    copy {
+        from 'template'
+        into 'output'
+        
+        expand packageName:'com.example.bean', className:targetName, 
+            fields:['String':'name', 'int':'value']
+
+        rename 'template.java', "${targetName}.java"
+    }
+}
+
+task createFile << {
+    File newFile = file('newFile.txt')
+    newFile.write('빌드 스크립트로 파일을 생성한다.', 'UTF-8')
+}
+
+task printLog << {
+    logger.error '에러 메시지'
+    logger.quiet '중요 메시지'
+    logger.warn '경고 메시지'
+    logger.lifecycle '빌드 진행 상황을 나타내는 메시지'
+    logger.info '인포메이션 메시지'
+    logger.debug '디버그 메시지'
+}

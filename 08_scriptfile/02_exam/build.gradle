@@ -1,0 +1,44 @@
+task greet << {
+    println System.properties['message']
+    println message
+}
+
+task addRepository << {    
+    println 'before Repositories'
+    repositories.each { println it.name }
+
+    repositories {
+        mavenCentral()
+    }
+
+    println 'after Repositories'
+    repositories.each { println it.name }
+    
+}
+
+task addRepository2 << {    
+    println 'before Repositories'
+    
+    repositories.each { println it.name }
+
+    def closure = { mavenCentral() }
+    this.repositories(closure)
+
+    println 'after Repositories'
+    repositories.each { println it.name }
+    
+}
+
+
+task addRepository3 << {    
+    println 'before Repositories'
+    
+    repositories.each { println it.name }
+
+    RepositoryHandler repos = this.getRepositories()
+    repos.mavenCentral()
+
+    println 'after Repositories'
+    repositories.each { println it.name }
+    
+}

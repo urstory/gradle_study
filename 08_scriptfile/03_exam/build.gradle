@@ -1,0 +1,70 @@
+
+defaultTasks 'showProjectName'
+
+gradle.allprojects { 
+    project ->
+        project.beforeEvaluate {
+            println project.name + ' : beforeEvaluate'
+        }
+        project.afterEvaluate {
+            println project.name + ' : afterEvaluate'
+        }
+}
+
+project.description = 'default task description project'
+
+task showProjectName << {
+    println project.name
+}
+
+task showDescription << {
+    println project.description
+}
+
+// task()의 괄호를 생략하고 처리용 클로저를 추가한다.
+task hello1 << {
+    println 'Hello 1'
+}
+
+// 태스크 정의와 처리 추가를 동시에 하는 것으로 API를 고려해서 수정
+def hello2Task = task('hello2')
+hello2Task << { println 'Hello 2'}
+
+// << 연산자는 leftShift()의 축약형이다.
+task hello3Task { }
+hello3Task.leftShift({ println 'hello 3'})
+
+def hello4Task = task('hello4')
+hello4Task.leftShift({ println 'hello 4'})
+
+task myTask << {
+    println name
+}
+
+myTask.group 'help'
+myTask.description 'help MyTask!!!'
+
+task myApplicationTask {
+    doFirst {
+        println 'First!'
+    }
+
+    doLast {
+        println 'Last!'
+    }
+
+}
+
+class MyTaskExecutionListener implements TaskExecutionListener{
+    void beforeExecute(Task task){
+        println '** ' + task.name + ' execute.'
+    }
+
+    void afterExecute(Task task, TaskState state){
+        if(state.getExecuted()){
+            println '** ' + task.name + ' execute end.'
+        }
+    }
+}
+
+gradle.addListener(new MyTaskExecutionListener())

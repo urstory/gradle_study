@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Implementation-Title: Java App
+Implementation-Verstion: 0.1
+

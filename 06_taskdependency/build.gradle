@@ -1,0 +1,8 @@
+
+task todo << { println 'todo '}
+
+task doing(dependsOn: todo) << { println 'doing '}
+
+task done(dependsOn: doing) << { println 'done '}
+
+task hello << { println 'hello'}

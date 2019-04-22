@@ -1,0 +1,7 @@
+class Descriptor {
+    String show(){
+        '*** 이것은 그루비 스크립트입니다.'
+    }
+}
+
+println new Descriptor().show()
